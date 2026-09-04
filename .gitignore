@@ -1,0 +1,11 @@
+# Local Rulesync overrides and fetched caches
+rulesync.local.jsonc
+.rulesync/rules/.curated/
+.rulesync/skills/.curated/
+
+# Planning-with-Files local working memory
+task_plan.md
+findings.md
+progress.md
+.planning/
+.active_plan
