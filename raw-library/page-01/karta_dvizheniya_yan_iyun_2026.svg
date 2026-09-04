@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5f1e8"/><stop offset="1" stop-color="#e7e0d3"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="6" flood-opacity=".18"/></filter>
+    <marker id="a1" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" refX="19" refY="11" orient="auto"><path d="M0,0 L22,11 L0,22 z" fill="#4776b8"/></marker>
+    <marker id="a2" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" refX="19" refY="11" orient="auto"><path d="M0,0 L22,11 L0,22 z" fill="#d58a2d"/></marker>
+    <marker id="a3" markerUnits="userSpaceOnUse" markerWidth="22" markerHeight="22" refX="19" refY="11" orient="auto"><path d="M0,0 L22,11 L0,22 z" fill="#b4433d"/></marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#232323}.title{font-size:42px;font-weight:700}.sub{font-size:21px;fill:#555}.city{font-size:18px;font-weight:700}.small{font-size:16px;fill:#4d4d4d}.legend{font-size:19px}.region{font-size:16px;fill:#777;letter-spacing:1px}.axis{fill:none;stroke-width:7;stroke-linecap:round;opacity:.9}.note{font-size:17px}.box{fill:#fffdf8;stroke:#c8bfae;stroke-width:2}
+    </style>
+  </defs>
+  <rect width="1600" height="1100" fill="url(#bg)"/>
+  <text x="70" y="70" class="title">Заявленная динамика российских войск</text>
+  <text x="70" y="108" class="sub">Январь—июнь 2026 года · схема по публикациям Telegram-канала Colonelcassad</text>
+
+  <!-- schematic outline -->
+  <path d="M210 255 L360 210 L505 226 L620 188 L750 220 L858 190 L982 230 L1105 218 L1210 284 L1370 320 L1440 410 L1395 505 L1430 602 L1342 690 L1280 830 L1135 862 L1015 820 L900 855 L790 815 L665 858 L555 808 L425 825 L340 746 L225 700 L250 600 L185 520 L225 432 L170 350 Z" fill="#fffaf0" stroke="#706b62" stroke-width="4" filter="url(#shadow)"/>
+  <path d="M1090 220 L1080 860 M1220 285 L1190 820 M965 230 L985 820" stroke="#d6cec0" stroke-width="2" stroke-dasharray="8 9"/>
+  <text x="745" y="500" font-size="62" fill="#d8d0c3" font-weight="700">УКРАИНА</text>
+  <text x="1285" y="250" class="region">РОССИЯ</text>
+  <text x="1180" y="885" class="region">АЗОВСКОЕ МОРЕ</text>
+
+  <!-- cities -->
+  <g fill="#333">
+    <circle cx="1125" cy="300" r="7"/><text x="1138" y="306" class="city">Сумы</text>
+    <circle cx="1240" cy="405" r="7"/><text x="1253" y="411" class="city">Харьков</text>
+    <circle cx="1178" cy="488" r="6"/><text x="1190" y="483" class="city">Купянск</text>
+    <circle cx="1200" cy="565" r="6"/><text x="1212" y="560" class="city">Лиман</text>
+    <circle cx="1160" cy="616" r="6"/><text x="1172" y="612" class="city">Славянск</text>
+    <circle cx="1145" cy="655" r="6"/><text x="1157" y="650" class="city">Краматорск</text>
+    <circle cx="1130" cy="700" r="6"/><text x="1142" y="696" class="city">Константиновка</text>
+    <circle cx="1085" cy="755" r="6"/><text x="1020" y="780" class="city">Покровск</text>
+    <circle cx="1040" cy="690" r="6"/><text x="970" y="678" class="city">Гришино</text>
+    <circle cx="1000" cy="798" r="7"/><text x="900" y="805" class="city">Днепропетровская обл.</text>
+    <circle cx="915" cy="830" r="7"/><text x="805" y="855" class="city">Запорожская обл.</text>
+    <circle cx="755" cy="372" r="7"/><text x="768" y="378" class="city">Киев</text>
+  </g>
+
+  <!-- Jan-Feb -->
+  <path d="M1310 475 C1270 485 1240 510 1208 548" class="axis" stroke="#4776b8" marker-end="url(#a1)"/>
+  <path d="M1275 610 C1235 610 1205 606 1175 620" class="axis" stroke="#4776b8" marker-end="url(#a1)"/>
+  <text x="1285" y="535" class="small" fill="#4776b8">Купянск—Лиман</text>
+
+  <!-- Mar-Apr -->
+  <path d="M1305 330 C1245 330 1185 325 1135 305" class="axis" stroke="#d58a2d" marker-end="url(#a2)"/>
+  <path d="M1265 505 C1210 520 1195 535 1197 560" class="axis" stroke="#d58a2d" marker-end="url(#a2)"/>
+  <path d="M1215 740 C1175 735 1155 720 1133 703" class="axis" stroke="#d58a2d" marker-end="url(#a2)"/>
+  <path d="M1105 825 C1065 810 1035 800 1008 798" class="axis" stroke="#d58a2d" marker-end="url(#a2)"/>
+  <text x="1320" y="365" class="small">Сумское направление</text>
+  <text x="1230" y="730" class="small">Константиновка</text>
+
+  <!-- May-Jun -->
+  <path d="M1345 315 C1270 300 1198 292 1140 300" class="axis" stroke="#b4433d" marker-end="url(#a3)"/>
+  <path d="M1330 430 C1285 430 1262 418 1245 407" class="axis" stroke="#b4433d" marker-end="url(#a3)"/>
+  <path d="M1265 525 C1235 535 1215 548 1202 562" class="axis" stroke="#b4433d" marker-end="url(#a3)"/>
+  <path d="M1200 750 C1165 725 1145 710 1132 700" class="axis" stroke="#b4433d" marker-end="url(#a3)"/>
+  <path d="M1095 845 C1050 825 1025 810 1002 800" class="axis" stroke="#b4433d" marker-end="url(#a3)"/>
+
+  <!-- legend -->
+  <rect x="70" y="770" width="650" height="245" rx="18" class="box"/>
+  <text x="100" y="815" font-size="24" font-weight="700">Как читать схему</text>
+  <line x1="105" y1="855" x2="185" y2="855" stroke="#4776b8" stroke-width="9"/><text x="205" y="862" class="legend">Январь—февраль: позиционное давление</text>
+  <line x1="105" y1="900" x2="185" y2="900" stroke="#d58a2d" stroke-width="9"/><text x="205" y="907" class="legend">Март—апрель: расширение нескольких участков</text>
+  <line x1="105" y1="945" x2="185" y2="945" stroke="#b4433d" stroke-width="9"/><text x="205" y="952" class="legend">Май—июнь: усиление тех же направлений</text>
+  <text x="100" y="990" class="small">Стрелки показывают общий вектор сообщений, а не маршрут частей.</text>
+
+  <!-- summary -->
+  <rect x="805" y="905" width="725" height="130" rx="18" class="box"/>
+  <text x="835" y="945" class="note" font-weight="700">Смысл полугодия по версии канала:</text>
+  <text x="835" y="978" class="note">не единый прорыв, а последовательное давление на Сумы, Купянск,</text>
+  <text x="835" y="1008" class="note">Лиман, Константиновку и стык Запорожской и Днепропетровской областей.</text>
+
+  <text x="70" y="1070" class="small">Не является картой фактической линии фронта. Схема отражает заявления и отбор публикаций канала; независимая верификация не выполнена.</text>
+</svg>
