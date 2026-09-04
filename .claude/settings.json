@@ -5,9 +5,16 @@
         "source": "github",
         "repo": "DietrichGebert/ponytail"
       }
+    },
+    "planning-with-files": {
+      "source": {
+        "source": "github",
+        "repo": "OthmanAdi/planning-with-files"
+      }
     }
   },
   "enabledPlugins": {
-    "ponytail@ponytail": true
+    "ponytail@ponytail": true,
+    "planning-with-files@planning-with-files": true
   }
 }
