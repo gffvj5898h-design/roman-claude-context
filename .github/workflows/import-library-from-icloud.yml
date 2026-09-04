@@ -1,0 +1,106 @@
+name: Import Library archive from iCloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      short_guid:
+        description: Public iCloud Drive short GUID
+        required: true
+        type: string
+      package_name:
+        description: Package label such as page-01
+        required: true
+        type: string
+      sha256:
+        description: Expected SHA-256 of TAR archive
+        required: true
+        type: string
+      expected_size:
+        description: Expected TAR size in bytes
+        required: true
+        type: string
+      expected_files:
+        description: Expected regular-file count
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Download and verify archive
+        shell: bash
+        env:
+          ICLOUD_GUID: ${{ inputs.short_guid }}
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          EXPECTED_SHA256: ${{ inputs.sha256 }}
+          EXPECTED_SIZE: ${{ inputs.expected_size }}
+          EXPECTED_FILES: ${{ inputs.expected_files }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.request
+          endpoint='https://ckdatabasews.icloud.com/database/1/com.apple.cloudkit/production/public/records/resolve'
+          payload=json.dumps({'shortGUIDs':[{'value':os.environ['ICLOUD_GUID']}]}).encode()
+          req=urllib.request.Request(endpoint,data=payload,headers={'Content-Type':'application/json','User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(req,timeout=60) as r:
+              data=json.load(r)
+          url=data['results'][0]['rootRecord']['fields']['fileContent']['value']['downloadURL']
+          req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(req,timeout=120) as src, open('/tmp/package.tar','wb') as dst:
+              while True:
+                  chunk=src.read(1024*1024)
+                  if not chunk: break
+                  dst.write(chunk)
+          PY
+          test "$(stat -c '%s' /tmp/package.tar)" = "$EXPECTED_SIZE"
+          echo "$EXPECTED_SHA256  /tmp/package.tar" | sha256sum -c -
+
+      - name: Validate and extract
+        shell: bash
+        env:
+          PACKAGE_NAME: ${{ inputs.package_name }}
+          EXPECTED_FILES: ${{ inputs.expected_files }}
+        run: |
+          set -euo pipefail
+          export DST="raw-library/$PACKAGE_NAME"
+          rm -rf "$DST"
+          mkdir -p "$DST"
+          python3 - <<'PY'
+          import os, tarfile
+          src='/tmp/package.tar'; dst=os.environ['DST']; expected=int(os.environ['EXPECTED_FILES'])
+          with tarfile.open(src,'r:') as tf:
+              members=tf.getmembers(); files=0
+              for m in members:
+                  norm=os.path.normpath(m.name)
+                  if os.path.isabs(m.name) or norm == '..' or norm.startswith('../'):
+                      raise SystemExit(f'Unsafe path: {m.name!r}')
+                  if m.issym() or m.islnk() or m.isdev():
+                      raise SystemExit(f'Unsupported entry: {m.name!r}')
+                  files += int(m.isfile())
+              if files != expected:
+                  raise SystemExit(f'Unexpected file count {files}, expected {expected}')
+              tf.extractall(dst, filter='data')
+          PY
+
+      - name: Commit through Git LFS
+        shell: bash
+        env:
+          PACKAGE_NAME: ${{ inputs.package_name }}
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .gitattributes "raw-library/$PACKAGE_NAME"
+          git commit -m "Import raw Library $PACKAGE_NAME via iCloud and Git LFS"
+          git push origin HEAD:main
