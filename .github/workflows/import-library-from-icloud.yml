@@ -1,27 +1,35 @@
 name: Import Library archive from iCloud
 
 on:
+  push:
+    paths:
+      - '.github/workflows/import-library-from-icloud.yml'
   workflow_dispatch:
     inputs:
       short_guid:
         description: Public iCloud Drive short GUID
-        required: true
+        required: false
+        default: '0ebjMriB2d30JCT2CgJjVvQ8A'
         type: string
       package_name:
         description: Package label such as page-01
-        required: true
+        required: false
+        default: 'page-01'
         type: string
       sha256:
         description: Expected SHA-256 of TAR archive
-        required: true
+        required: false
+        default: '2847414f5c338221077a2b0615ab69741512f4e020a02de9235b6add5e67a14c'
         type: string
       expected_size:
         description: Expected TAR size in bytes
-        required: true
+        required: false
+        default: '187432960'
         type: string
       expected_files:
         description: Expected regular-file count
-        required: true
+        required: false
+        default: '83'
         type: string
 
 permissions:
@@ -29,8 +37,15 @@ permissions:
 
 jobs:
   import:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      ICLOUD_GUID: ${{ inputs.short_guid || '0ebjMriB2d30JCT2CgJjVvQ8A' }}
+      PACKAGE_NAME: ${{ inputs.package_name || 'page-01' }}
+      EXPECTED_SHA256: ${{ inputs.sha256 || '2847414f5c338221077a2b0615ab69741512f4e020a02de9235b6add5e67a14c' }}
+      EXPECTED_SIZE: ${{ inputs.expected_size || '187432960' }}
+      EXPECTED_FILES: ${{ inputs.expected_files || '83' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,12 +54,6 @@ jobs:
 
       - name: Download and verify archive
         shell: bash
-        env:
-          ICLOUD_GUID: ${{ inputs.short_guid }}
-          PACKAGE_NAME: ${{ inputs.package_name }}
-          EXPECTED_SHA256: ${{ inputs.sha256 }}
-          EXPECTED_SIZE: ${{ inputs.expected_size }}
-          EXPECTED_FILES: ${{ inputs.expected_files }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -67,9 +76,6 @@ jobs:
 
       - name: Validate and extract
         shell: bash
-        env:
-          PACKAGE_NAME: ${{ inputs.package_name }}
-          EXPECTED_FILES: ${{ inputs.expected_files }}
         run: |
           set -euo pipefail
           export DST="raw-library/$PACKAGE_NAME"
@@ -94,13 +100,15 @@ jobs:
 
       - name: Commit through Git LFS
         shell: bash
-        env:
-          PACKAGE_NAME: ${{ inputs.package_name }}
         run: |
           set -euo pipefail
           git lfs install --local
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .gitattributes "raw-library/$PACKAGE_NAME"
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
           git commit -m "Import raw Library $PACKAGE_NAME via iCloud and Git LFS"
           git push origin HEAD:main
