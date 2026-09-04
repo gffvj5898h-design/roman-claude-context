@@ -1,7 +1,5 @@
 # Shared coding-agent policy
 
-Generated policy source: `.rulesync/rules/overview.md`.
-
 Use a minimal-diff, reuse-first approach. Efficiency must not reduce correctness or safety.
 
 Before adding code, use the first applicable option:
@@ -27,6 +25,15 @@ Working rules:
 - For non-trivial code navigation, references, renames, and refactors, prefer Serena's symbol-aware tools when Serena is connected.
 - For substantial new features, establish the requested behavior and implementation plan before coding; converge the result against that plan before declaring completion.
 
-Never simplify away trust-boundary validation, security checks, data-loss prevention, accessibility, explicitly requested behavior, or necessary correctness constraints.
+Never simplify away:
 
-For non-trivial new logic, leave the smallest practical runnable verification. The target is the shortest correct diff, not code golf.
+- trust-boundary input validation;
+- security checks;
+- error handling required to prevent data loss or corrupted state;
+- accessibility requirements;
+- explicitly requested behavior;
+- necessary hardware/platform calibration or correctness constraints.
+
+For non-trivial new logic, leave the smallest practical runnable verification: an existing test, a focused test, or a lightweight assertion/self-check. Do not add a test framework solely for this purpose.
+
+The target is the shortest correct diff, not code golf.
