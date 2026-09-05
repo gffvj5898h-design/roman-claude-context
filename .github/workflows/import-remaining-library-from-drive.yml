@@ -1,0 +1,151 @@
+name: Import remaining Library from Google Drive
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-remaining-library-from-drive.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Install downloader
+        run: python3 -m pip install --disable-pip-version-check --quiet gdown
+
+      - name: Download and verify all Drive parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/roman-drive
+          cat > /tmp/roman-drive/parts.tsv <<'EOF'
+          A	00	1gAoRFid6O6Q106IaKO5nxeva1Vwu1c7S	c2f10651d3d945a56f23b75513fd1b77d3a9cabb37e74bb6b09abc94327fd513
+          A	01	19nh-TBbzlPaGvodWkdAl9YUekF7RzUGO	a1d847b9088a79789c234466e5ec1053b118635ec3505e67a74863710948ac10
+          A	02	1DA2X9eYuICiT37njseXCYna81RGaqZ88	37278391041a3e5be562f40978aaafd232014be978dd31d8155b9c9f237150a4
+          A	03	1LAJO6ydgGUnd129BBCHkuYe5wSeWW0jB	215ee13ae16b3a4e9684ec5b5eae94ee489060309ab667623a774e59b2a2e016
+          A	04	1i95NYTKYzdntsX-q4nMAM7YvbsgoW23x	e812da3b3579fc9b1f70287b0d3ff8a578a79c209256b9e07db592f370bdd691
+          A	05	1ESWfKK2PBZ9EYhBZoCJpS8on0h2-zEhp	d6b254d32ebed15306014d0a613836644d0021d6974be97e2398f99d37220ca7
+          A	06	1Qt5795JzUeiZn3QvMdiaRuHjfiwg6z3g	e264eaf14f8c4eb7d2f9d72e8a4a50b32f9398e1d258f4f2f08babdc47b0fc0f
+          B	00	18OeVSu2s1zDhkA5gstJcslN_SCd_ZmIz	0ac9507e5f79ca134b4b88cbd8d8b6a7b20b243ab128c1de5490bb4bba7aab48
+          B	01	12HPkwfpk3Z3CjqXvXWho_PUetVUxa0mq	abc3c4c31729a1008acc7c9a0339373189f2c6fb3ad384c415c50639e91ebff2
+          B	02	1U56YHK9gDM6eGwjOIRrXG1ZomN2cCDsx	e391a8a820c3f9a847ab035725b9fc96dd190b9afe6be92c1942c45e273159b2
+          B	03	1Sa6NenDizEtROyb-MkmOGzXPA0wZM9WR	cbdc09bea09106d88351ca40e532fc424fbda236d5685e651232271c0e5ce564
+          B	04	1R4H4WEh3xyqjxA9_sA8qIhjDqcIQfm2P	f44f92c1d8f7943e0746c20cb3a64e8019262d757edb2ac3b79421e544281305
+          B	05	1-FkXBi98PP5DdfIjYUih-Xhh1iH6goe6	00940d772a1bd32a84dab57452f996e1bca5444b1467a5bc0a32b39972f01a75
+          B	06	1Wfr8W2mN3UoLcxe6JtRn79D3DJSfSDTa	f692316f96a96b37b263313e1f3e5ce5616086f10aaf2e0de86af0af20e5a5ab
+          C	00	176UFhBwqfIZNLfbb2sojaTyyb-jQy3hC	1b0b18fd4b5c545b7c01cefbac2bf74033872e4a385836e430a238ae1cd4710f
+          C	01	1VzXAKSGjLMAd8D9LUHgM8aapNlhjbv-1	d62d9cf7437ed616d2da8230ec6d84142359be421e4fca49f1aa4bc1de4047bd
+          C	02	146qQxEtpSEam42Z9bR-h5A_8nq2ooJzn	2e62b46f17e1a6e54464bb3a9f0996ff1beb46a0d07fd8be7eb07223b2db0767
+          C	03	1u4kH0N98J0zZ_xEwM925WbDlmuai19Pj	1f2ace647761340911f4ce72725684ded5c5178688d32db62b4f591367177d4d
+          C	04	1bn-Cpa6jGgx5fA_eTZL14vsAkHAA8GZO	3a2831b8e8b1ae01b8cb30751f2dcded119323c1e70f91afde2bd546dc08cf69
+          EOF
+
+          while IFS=$'\t' read -r batch part file_id expected_sha; do
+            out="/tmp/roman-drive/${batch}.part-${part}"
+            echo "Downloading ${batch}.part-${part}"
+            gdown "https://drive.google.com/uc?id=${file_id}" -O "$out" --quiet
+            echo "${expected_sha}  ${out}" | sha256sum -c -
+          done < /tmp/roman-drive/parts.tsv
+
+          cat /tmp/roman-drive/A.part-* > /tmp/roman-drive/A.tar
+          cat /tmp/roman-drive/B.part-* > /tmp/roman-drive/B.tar
+          cat /tmp/roman-drive/C.part-* > /tmp/roman-drive/C.tar
+
+          echo 'dbdd3b10dee704d75be04297db9e03e7be54e23b7bb005cfddf5996d6fd66112  /tmp/roman-drive/A.tar' | sha256sum -c -
+          echo '5b5011e4674ec854297e89804b24f1e13ce141a6eee56bdd8da4e8f33f6b7d7c  /tmp/roman-drive/B.tar' | sha256sum -c -
+          echo '62a8201d4d269cac5ea1ca5900e74ed20032269b493e78f0e90d70f1bc7d4715  /tmp/roman-drive/C.tar' | sha256sum -c -
+
+      - name: Validate TAR contents and extract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, shutil, tarfile
+
+          specs = {
+              'A': (253, {'page-02','page-03','page-04'}),
+              'B': (113, {'page-05','page-06'}),
+              'C': (336, {'page63','page64','page65','page104'}),
+          }
+          os.makedirs('raw-library', exist_ok=True)
+
+          for batch, (expected_files, expected_roots) in specs.items():
+              src = f'/tmp/roman-drive/{batch}.tar'
+              with tarfile.open(src, 'r:') as tf:
+                  members = tf.getmembers()
+                  regular = 0
+                  roots = set()
+                  for m in members:
+                      norm = os.path.normpath(m.name)
+                      if os.path.isabs(m.name) or norm == '..' or norm.startswith('../'):
+                          raise SystemExit(f'Unsafe path in {batch}: {m.name!r}')
+                      if m.issym() or m.islnk() or m.isdev():
+                          raise SystemExit(f'Unsupported TAR entry in {batch}: {m.name!r}')
+                      if norm not in ('.',''):
+                          roots.add(norm.split(os.sep,1)[0])
+                      regular += int(m.isfile())
+                  if regular != expected_files:
+                      raise SystemExit(f'{batch}: {regular} regular files, expected {expected_files}')
+                  if roots != expected_roots:
+                      raise SystemExit(f'{batch}: roots {sorted(roots)!r}, expected {sorted(expected_roots)!r}')
+
+                  for root in expected_roots:
+                      dst = os.path.join('raw-library', root)
+                      if os.path.exists(dst):
+                          shutil.rmtree(dst)
+                  tf.extractall('raw-library', filter='data')
+                  print(f'{batch}: validated and extracted {regular} files')
+          PY
+
+          test "$(find raw-library/page-02 raw-library/page-03 raw-library/page-04 raw-library/page-05 raw-library/page-06 raw-library/page63 raw-library/page64 raw-library/page65 raw-library/page104 -type f | wc -l)" = '702'
+
+      - name: Write import verification record
+        shell: bash
+        run: |
+          cat > library-export/raw-library-drive-import.md <<'EOF'
+          # Raw Library Google Drive import
+
+          Status: **completed by GitHub Actions after cryptographic verification**.
+
+          - Existing `raw-library/page-01`: 83 files.
+          - Imported in this run: 702 files.
+          - Total raw snapshots represented in `raw-library/`: 785 files.
+          - Library originals successfully materialized earlier: 780.
+          - Library entries whose raw bytes were unavailable from the source backend: 61.
+
+          Reassembled archive SHA-256 values:
+
+          - A (`page-02`, `page-03`, `page-04`): `dbdd3b10dee704d75be04297db9e03e7be54e23b7bb005cfddf5996d6fd66112`
+          - B (`page-05`, `page-06`): `5b5011e4674ec854297e89804b24f1e13ce141a6eee56bdd8da4e8f33f6b7d7c`
+          - C (`page63`, `page64`, `page65`, `page104`): `62a8201d4d269cac5ea1ca5900e74ed20032269b493e78f0e90d70f1bc7d4715`
+
+          Each Google Drive part was also checked against its individual SHA-256 before concatenation. TAR paths, file counts, and unsafe entry types were validated before extraction.
+          EOF
+
+      - name: Commit through Git LFS
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .gitattributes \
+            raw-library/page-02 raw-library/page-03 raw-library/page-04 \
+            raw-library/page-05 raw-library/page-06 \
+            raw-library/page63 raw-library/page64 raw-library/page65 raw-library/page104 \
+            library-export/raw-library-drive-import.md
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git commit -m 'Import remaining raw Library files via Google Drive and Git LFS'
+          git push origin HEAD:main
